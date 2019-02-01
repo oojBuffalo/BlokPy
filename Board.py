@@ -28,17 +28,30 @@ class Board(object):
         #------Check if this is a valid move------#
         #Case 1: valid if the space is unoccupied
         space = np.take(self.board,board_idxs)
-        if(space.any() != 0):
+        if space.any() != 0:
             raise Exception("Space is occupied")
 
         #Case 2: valid if the block is (exclusively) diagonally adjacent
         #        to a previously placed block of its own color
-        verts =
+        verts = self.vertices(block_rs+r,block_cs+c)
 
         np.put(self.board,board_idxs,pid)
 
+    def rm_oob_idxs(self,ud,lr,oob_ud_idxs,oob_lr_idxs):
+        if len(oob_ud_idxs) == 0 and len(oob_lr_idxs) == 0:
+            return ud*self.size+lr
+        oob_idxs = np.unique(np.concatenate((oob_ud_idxs,oob_lr_idxs)))
+        new_ud = np.delete(ud,oob_idxs)
+        new_lr = np.delete(lr,oob_idxs)
+        return new_ud*self.size+new_lr
+
     def adjacent(self,board_rs,board_cs):
         s = self.size
+        #fix oob problem here
+        #Imagine one entry of bd_idxs (i.e. one square of one block) is at
+        #index 10 on the board.  This means shifting left would result in a
+        #value of 9.  This is NOT NEGATIVE and will not be caught in the return
+        #statement.
         bd_idxs = board_rs*s+board_cs
 
         up_idxs = bd_idxs-s
@@ -59,13 +72,19 @@ class Board(object):
         lf = board_cs-1
         rt = board_cs+1
 
-        up_lf_idxs = up*s+lf
-        up_rt_idxs = up*s+rt
-        dn_lf_idxs = dn*s+lf
-        dn_rt_idxs = dn*s+rt
+        oob_up_idxs = np.where(up < 0)
+        oob_dn_idxs = np.where(dn >= self.size)
+        oob_lf_idxs = np.where(lf < 0)
+        oob_rt_idxs = np.where(rt >= self.size)
 
-        raw_idxs = np.concatenate((up_lf_idxs,up_rt_idxs,dn_lf_idxs,dn_rt_idxs))
+        up_lf = self.rm_oob_idxs(up,lf,oob_up_idxs,oob_lf_idxs)
+        up_rt = self.rm_oob_idxs(up,rt,oob_up_idxs,oob_rt_idxs)
+        dn_lf = self.rm_oob_idxs(dn,lf,oob_dn_idxs,oob_lf_idxs)
+        dn_rt = self.rm_oob_idxs(dn,rt,oob_dn_idxs,oob_rt_idxs)
+
+        raw_idxs = np.concatenate((up_lf,up_rt,dn_lf,dn_rt))
         no_block_idxs = raw_idxs[np.isin(raw_idxs,board_idxs,invert=True)]
-        no_neg_idxs = no_block_idxs[np.where(no_block_idxs >= 0)]
+        # no_neg_idxs = no_block_idxs[np.where(no_block_idxs >= 0)]
+        # no_oob_idxs = no_neg_idxs[np.where(no_neg_idxs < self.size)]
         adj_idxs = self.adjacent(board_rs,board_cs)
-        return no_neg_idxs[np.isin(no_neg_idxs,adj_idxs,invert=True)]
+        return no_block_idxs[np.isin(no_block_idxs,adj_idxs,invert=True)]
