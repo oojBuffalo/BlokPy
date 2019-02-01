@@ -53,7 +53,7 @@ class Block(object):
         r,c = loc
         visited.append(loc)
 
-        print(visited)
+        #print(visited)
 
         #check right
         if c+1 < self.dim and self.mat[r][c+1] and not (r,c+1) in visited:
@@ -71,7 +71,7 @@ class Block(object):
 
     def rotate(self,dir=-1,rots=1):
         true_rots = rots % 4
-        new_mat = np.rot90(self.mat,true_rots)
+        return np.rot90(self.mat,true_rots)
 
     def reflect(self,axis=0):
         if axis == 0:
@@ -79,7 +79,7 @@ class Block(object):
         return np.fliplr(self.mat)
 
     def get_mat(self):
-        return self.mat.copy()
+        return self.mat
 
     def get_card(self):
         return self.card

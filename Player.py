@@ -12,17 +12,25 @@ class Player(object):
     each player can place a Block on the Board.
     """
 
-    #player's color/uid
-    color = None
-    #set of Blocks/game pieces
+    #player's id : int
+    pid = None
+    #set of Blocks/game pieces : list of block objects
     block_set = None
 
     def __init__(self,uid,given_blocks):
-        self.color = uid
+        self.pid = uid
         self.block_set = given_blocks
 
-    def place_block(self,block,board,loc):
-        board.place(self.color,block,loc)
-        block_set = block_set - block
+    # def place_block(self,block,board,loc):
+    #     board.place(self.color,block,loc)
+    #     block_set = block_set - block
 
+    def get_pid(self):
+        return self.pid
+
+    def get_rem_blocks(self):
+        return self.block_set
+
+    def num_rem_blocks(self):
+        return len(self.block_set)
     #will consider adding more methods...
