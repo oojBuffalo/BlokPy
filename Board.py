@@ -15,15 +15,15 @@ class Board(object):
     #--------------------------------------------------------------------#
 
     #board matrix : ndarray
-    grid = None
+    __grid = None
     #board size : int
-    size = None
+    __size = None
 
     #Board class constructor.
     #INPUT: @n : int = the size in terms of n of an nxn board; default is 20.
     def __init__(self,n=20):
-        self.grid = np.zeros(n*n).reshape(n,n)
-        self.size = n
+        self.__grid = np.zeros(n*n,dtype=int).reshape(n,n)
+        self.__size = n
 
     #Function allows a player to place any (transformed) block onto the board.
     #INPUT: @pid : int = the player's id
@@ -40,83 +40,98 @@ class Board(object):
 
         #Condition 1: invalid if any squares in the block are off the grid.
         if ((board_rs).any() < 0
-            or (board_rs).any() >= self.size
+            or (board_rs).any() >= self.__size
             or (board_cs).any() < 0
-            or (board_cs).any() >= self.size):
+            or (board_cs).any() >= self.__size):
             raise Exception("Block not on grid")
 
-        #Condition 2: invalid if the space is already occupied
-        board_pstns = (board_rs)*self.size+(board_cs)
-        space = np.take(self.grid,board_pstns)
+        #Condition 2: invalid if the space is acseady occupied
+        board_pstns = (board_rs)*self.__size+(board_cs)
+        space = np.take(self.__grid,board_pstns)
         if space.any() != 0:
-            raise Exception("Space already occupied")
+            raise Exception("Space acseady occupied")
 
         #Condition 3: invalid if any adjacent grid cells contain the same pid.
         adj_pstns = self.adjacent()
-        space = np.take(self.grid,adj_pstns)
+        space = np.take(self.__grid,adj_pstns)
         if space.any() == pid:
             raise Exception("Own block adjacent")
 
         #Condition 4: invalid if all diagonally adjacent grid cells do not
         #             contain the same pid.
         vert_pstns = self.vertices(board_rs,board_cs)
-        space = np.take(self.grid,vert_pstns)
+        space = np.take(self.__grid,vert_pstns)
         if space.all() != pid:
             raise Exception("No diagonally adjacent blocks")
 
         #-------------------------Move is valid---------------------------#
+        np.put(self.__grid,board_pstns,pid)
 
-        np.put(self.grid,board_pstns,pid)
+    def rm_oob_idxs(self,rs,cs):
 
-    #why ask for out of bounds indices as params?
-    def rm_oob_idxs(self,ud,lr,oob_ud_idxs,oob_lr_idxs):
-        if len(oob_ud_idxs) == 0 and len(oob_lr_idxs) == 0:
-            return ud*self.size+lr
-        oob_idxs = np.unique(np.concatenate((oob_ud_idxs,oob_lr_idxs)))
-        new_ud = np.delete(ud,oob_idxs)
-        new_lr = np.delete(lr,oob_idxs)
-        return new_ud*self.size+new_lr
+        oob_up = np.where(rs < 0)[0]
+        oob_dn = np.where(rs >= self.__size)[0]
+        oob_lf = np.where(cs < 0)[0]
+        oob_rt = np.where(cs >= self.__size)[0]
+
+        if (len(oob_up) == 0
+            and len(oob_dn) == 0
+            and len(oob_lf) == 0
+            and len(oob_rt) == 0):
+            return rs*self.__size+cs
+
+        oob_idxs = np.unique(np.concatenate((oob_up,oob_dn,oob_lf,oob_rt)))
+        new_rs = np.delete(rs,oob_idxs)
+        new_cs = np.delete(cs,oob_idxs)
+        return new_rs*self.__size+new_cs
 
     def adjacent(self,board_rs,board_cs):
-        board_pstns = board_rs*self.size+board_cs
+        board_pstns = board_rs*self.__size+board_cs
 
         raw_up = board_rs-1
         raw_dn = board_rs+1
         raw_lf = board_cs-1
         raw_rt = board_cs+1
 
-        oob_up_idxs = np.where(raw_up < 0)
-        oob_dn_idxs = np.where(raw_dn >= self.size)
-        oob_lf_idxs = np.where(raw_lf < 0)
-        oob_rt_idxs = np.where(raw_rt >= self.size)
+        up = self.rm_oob_idxs(raw_up,board_cs)
+        dn = self.rm_oob_idxs(raw_dn,board_cs)
+        lf = self.rm_oob_idxs(board_rs,raw_lf)
+        rt = self.rm_oob_idxs(board_rs,raw_rt)
 
-        up_pstns = self.rm_oob_idxs(raw_up,board_cs,oob_up_idxs,[])
-        dn_pstns = self.rm_oob_idxs(raw_dn,board_cs,oob_dn_idxs,[])
-        lf_pstns = self.rm_oob_idxs(board_rs,raw_lf,[],oob_lf_idxs)
-        rt_pstns = self.rm_oob_idxs(board_rs,raw_rt,[],oob_rt_idxs)
-
-        all_pstns = np.concatenate((up_pstns,lf_pstns,rt_pstns,dn_pstns))
-        return all_pstns[np.isin(all_pstns,board_pstns,invert=True)]
+        all_pstns = np.unique(np.concatenate((up,lf,rt,dn)))
+        final = all_pstns[np.isin(all_pstns,board_pstns,invert=True)]
+        final.sort()
+        return final
 
     def vertices(self,board_rs,board_cs):
-        board_pstns = board_rs*self.size+board_cs
+        board_pstns = board_rs*self.__size+board_cs
 
         up = board_rs-1
         dn = board_rs+1
         lf = board_cs-1
         rt = board_cs+1
 
-        oob_up_idxs = np.where(up < 0)
-        oob_dn_idxs = np.where(dn >= self.size)
-        oob_lf_idxs = np.where(lf < 0)
-        oob_rt_idxs = np.where(rt >= self.size)
-
-        up_lf = self.rm_oob_idxs(up,lf,oob_up_idxs,oob_lf_idxs)
-        up_rt = self.rm_oob_idxs(up,rt,oob_up_idxs,oob_rt_idxs)
-        dn_lf = self.rm_oob_idxs(dn,lf,oob_dn_idxs,oob_lf_idxs)
-        dn_rt = self.rm_oob_idxs(dn,rt,oob_dn_idxs,oob_rt_idxs)
+        up_lf = self.rm_oob_idxs(up,lf)
+        up_rt = self.rm_oob_idxs(up,rt)
+        dn_lf = self.rm_oob_idxs(dn,lf)
+        dn_rt = self.rm_oob_idxs(dn,rt)
 
         raw_pstns = np.concatenate((up_lf,up_rt,dn_lf,dn_rt))
         no_block_pstns = raw_pstns[np.isin(raw_pstns,board_pstns,invert=True)]
         adj_pstns = self.adjacent(board_rs,board_cs)
-        return no_block_pstns[np.isin(no_block_idxs,adj_idxs,invert=True)]
+        final = no_block_pstns[np.isin(no_block_pstns,adj_pstns,invert=True)]
+        final.sort()
+        return final
+
+    def to_string(self):
+        s = ''
+        for i in range(self.__size*self.__size):
+            if i == 0: s += "-------------------------------------------\n"
+            if i%20 == 0: s += '| '
+            if i == 0: s += str(self.__grid[0][0]) + ' '
+            else:
+                s += str(self.__grid[int(i/20-1),i%10]) + ' '
+            if i%20 == 19: s += '|\n'
+            if i == self.__size*self.__size-1:
+                s += "-------------------------------------------\n"
+        return s
