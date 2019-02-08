@@ -39,20 +39,20 @@ class Board(object):
         #---------------------Check if move is valid----------------------#
 
         #Condition 1: invalid if any squares in the block are off the grid.
-        if ((board_rs).any() < 0
-            or (board_rs).any() >= self.__size
-            or (board_cs).any() < 0
-            or (board_cs).any() >= self.__size):
+        if ((board_rs < 0).any()
+            or (board_rs >= self.__size).any()
+            or (board_rs < 0).any()
+            or (board_rs >= self.__size).any()):
             raise Exception("Block not on grid")
 
-        #Condition 2: invalid if the space is acseady occupied
+        #Condition 2: invalid if the space is already occupied
         board_pstns = (board_rs)*self.__size+(board_cs)
         space = np.take(self.__grid,board_pstns)
         if space.any() != 0:
-            raise Exception("Space acseady occupied")
+            raise Exception("Space already occupied")
 
         #Condition 3: invalid if any adjacent grid cells contain the same pid.
-        adj_pstns = self.adjacent()
+        adj_pstns = self.adjacent(board_rs,board_cs)
         space = np.take(self.__grid,adj_pstns)
         if space.any() == pid:
             raise Exception("Own block adjacent")
@@ -61,7 +61,7 @@ class Board(object):
         #             contain the same pid.
         vert_pstns = self.vertices(board_rs,board_cs)
         space = np.take(self.__grid,vert_pstns)
-        if space.all() != pid:
+        if space.all() != pid and np.isin(pid,self.__grid.flatten()):
             raise Exception("No diagonally adjacent blocks")
 
         #-------------------------Move is valid---------------------------#
@@ -122,6 +122,9 @@ class Board(object):
         final = no_block_pstns[np.isin(no_block_pstns,adj_pstns,invert=True)]
         final.sort()
         return final
+
+    def get_grid(self):
+        return self.__grid.copy()
 
     def to_string(self):
         s = ''

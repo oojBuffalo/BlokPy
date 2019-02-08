@@ -92,5 +92,42 @@ class BoardTests(unittest.TestCase):
         x = theBoard.vertices(cross_rs,cross_cs)
         self.assertEqual(np.equal(x,[3,43,60,62]).all(),True)
 
+    def test_place_block(self):
+        theBoard = Board.Board()
+        line3_mat = np.vstack(([1,1,1],[0,0,0],[0,0,0]))
+        cross_mat = np.vstack(([0,1,0],[1,1,1],[0,1,0]))
+        cross_rs,cross_cs = np.nonzero(cross_mat)
+        line3_rs,line3_cs = np.nonzero(line3_mat)
+
+        line3_b = Block.Block(line3_mat)
+        cross_b = Block.Block(cross_mat)
+
+        #Test Condition #1
+        with self.assertRaises(Exception) as cm:
+            theBoard.place_block(1,line3_b,[-1,0])
+        self.assertEqual(format(cm.exception),'Block not on grid')
+
+
+        #
+        # try:
+        #     theBoard.place_block(1,line3_b,[0,0])
+        # except:
+        #     self.assertEqual(False,True)
+        # else:
+        #     self.assertEqual(True,True)
+
+
+
+    # def test_adj_block_in_the_way(self):
+    #     theBoard = Board.Board()
+    #     line3_mat = np.vstack((np.ones(3),np.zeros(6))).reshape(3,3)
+    #     cross_mat = np.vstack(([0,1,0],[1,1,1],[0,1,0]))
+    #     cross_rs,cross_cs = np.nonzero(cross_mat)
+    #     line3_rs,line3_cs = np.nonzero(line3_mat)
+    #
+    #     #All adjacent free except above (where line3 is)
+    #     x = theBoard.adjacent(cross_rs+1,cross_cs+1)
+    #     self.assertEqual(np.equal(x,[2,21,23,40,44,61,63,82]).all(),True)
+
 if __name__ == '__main__':
     unittest.main()
