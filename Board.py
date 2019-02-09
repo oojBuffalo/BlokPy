@@ -48,7 +48,7 @@ class Board(object):
         #Condition 2: invalid if the space is already occupied
         board_pstns = (board_rs)*self.__size+(board_cs)
         space = np.take(self.__grid,board_pstns)
-        if space.any() != 0:
+        if (space != 0).any():
             raise Exception("Space already occupied")
 
         #Condition 3: invalid if any adjacent grid cells contain the same pid.
@@ -61,7 +61,7 @@ class Board(object):
         #             contain the same pid.
         vert_pstns = self.vertices(board_rs,board_cs)
         space = np.take(self.__grid,vert_pstns)
-        if space.all() != pid and np.isin(pid,self.__grid.flatten()):
+        if (space != pid).all() and np.isin(pid,self.__grid.flatten()):
             raise Exception("No diagonally adjacent blocks")
 
         #-------------------------Move is valid---------------------------#
@@ -128,13 +128,14 @@ class Board(object):
 
     def to_string(self):
         s = ''
-        for i in range(self.__size*self.__size):
-            if i == 0: s += "-------------------------------------------\n"
-            if i%20 == 0: s += '| '
-            if i == 0: s += str(self.__grid[0][0]) + ' '
-            else:
-                s += str(self.__grid[int(i/20-1),i%10]) + ' '
-            if i%20 == 19: s += '|\n'
-            if i == self.__size*self.__size-1:
-                s += "-------------------------------------------\n"
+        sz = self.__size
+        dgts = lambda n : len(str(int(n)))
+        sz_dgts = dgts(sz)
+        for i in range(sz*sz):
+            if i == 0: s += '-'*(sz*2+sz_dgts+5)+'\n'
+            if i%sz == 0: s += ' '*(sz_dgts-dgts(i/sz))+str(int(i/sz))+': | '
+            if i == 0: s += str(self.__grid[0][0])+' '
+            else: s += str(self.__grid[int(i/sz)][i%sz])+' '
+            if i%sz == sz-1: s += '|\n'
+            if i == sz*sz-1: s += '-'*(sz*2+sz_dgts+5)+'\n'
         return s

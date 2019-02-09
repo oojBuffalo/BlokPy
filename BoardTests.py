@@ -25,7 +25,6 @@ class BoardTests(unittest.TestCase):
         cs_rt1 = cross_cs+18
 
         x = theBoard.rm_oob_idxs(rs_up1,cross_cs)
-        #self.assertEqual(len(x),4)
         self.assertEqual(np.equal(x,[0,1,2,21]).all(),True)
 
         x = theBoard.rm_oob_idxs(cross_rs,cs_lf1)
@@ -107,27 +106,31 @@ class BoardTests(unittest.TestCase):
             theBoard.place_block(1,line3_b,[-1,0])
         self.assertEqual(format(cm.exception),'Block not on grid')
 
+        #Test Condition #2
+        theBoard.place_block(1,line3_b,[0,0])
+        with self.assertRaises(Exception) as cm:
+            theBoard.place_block(2,cross_b,[0,0])
+        self.assertEqual(format(cm.exception),'Space already occupied')
 
-        #
-        # try:
-        #     theBoard.place_block(1,line3_b,[0,0])
-        # except:
-        #     self.assertEqual(False,True)
-        # else:
-        #     self.assertEqual(True,True)
+        #Test Condition #3
+        with self.assertRaises(Exception) as cm:
+            theBoard.place_block(1,cross_b,[1,0])
+        self.assertEqual(format(cm.exception),'Own block adjacent')
 
+        #Test Condtion #4
+        with self.assertRaises(Exception) as cm:
+            theBoard.place_block(1,cross_b,[5,5])
+        self.assertEqual(format(cm.exception),'No diagonally adjacent blocks')
 
+        #Valid placement
+        try:
+            theBoard.place_block(1,cross_b,[1,2])
+        except:
+            self.assertEqual(False,True)
+        else:
+            self.assertEqual(True,True)
 
-    # def test_adj_block_in_the_way(self):
-    #     theBoard = Board.Board()
-    #     line3_mat = np.vstack((np.ones(3),np.zeros(6))).reshape(3,3)
-    #     cross_mat = np.vstack(([0,1,0],[1,1,1],[0,1,0]))
-    #     cross_rs,cross_cs = np.nonzero(cross_mat)
-    #     line3_rs,line3_cs = np.nonzero(line3_mat)
-    #
-    #     #All adjacent free except above (where line3 is)
-    #     x = theBoard.adjacent(cross_rs+1,cross_cs+1)
-    #     self.assertEqual(np.equal(x,[2,21,23,40,44,61,63,82]).all(),True)
+        #print(theBoard.to_string())
 
 if __name__ == '__main__':
     unittest.main()
