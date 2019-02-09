@@ -21,9 +21,14 @@ class Player(object):
         self.pid = uid
         self.block_set = given_blocks
 
-    # def place_block(self,block,board,loc):
-    #     board.place(self.color,block,loc)
-    #     block_set = block_set - block
+    def has_move(self,board):
+        raise Exception('Unimplemented')
+
+    def possible_moves(self,board):
+        raise Exception('Unimplemented')
+
+    def choose_move(self,board):
+        raise Exception('Unimplemented')
 
     def get_pid(self):
         return self.pid
