@@ -34,6 +34,11 @@ class Block(object):
         self.__card = np.count_nonzero(mat)
         assert self.is_valid()
 
+    def __eq__(self,other):
+        if isinstance(other,self.__class__):
+            return self.__mat.all() == other.get_mat().all()
+        else: False
+
     #Function verifies traditional game pieces.
     #INPUT: void
     #OUTPUT: boolean indicating if polyomino is a traditional game piece
@@ -41,7 +46,7 @@ class Block(object):
         if self.__dim > self.__card or self.__card <= 0 or self.__card > 5:
             return False
         rs,cs = np.nonzero(self.__mat)
-        if self.num_connected((rs[0],cs[0]),1,[]) != self.__card:
+        if self.__num_connected((rs[0],cs[0]),1,[]) != self.__card:
             return False
         return True
 
@@ -54,7 +59,7 @@ class Block(object):
     def __num_connected(self,loc,count,visited):
         r,c = loc
         visited.append(loc)
-        
+
         #check right
         if c+1 < self.__dim and self.__mat[r][c+1] and not (r,c+1) in visited:
             count = self.__num_connected((r,c+1),count+1,visited)
@@ -77,6 +82,16 @@ class Block(object):
             return np.flipud(self.__mat)
         return np.fliplr(self.__mat)
 
+    #not mem efficient
+    #shifts piece to most up-left position
+    def standardize(self,mat):
+        new_mat = mat
+        while (new_mat[:,0] == 0).all():
+            new_mat = np.roll(new_mat,-1,axis=1)
+        while (new_mat[0,:] == 0).all():
+            new_mat = np.roll(new_mat,-1,axis=0)
+        return new_mat
+
         #player has move if one of their remaining blocks fits on the board
         #i.e. there exists a block within the set of all transformations of all
         #     remaining blocks such that the one of its transformations can be
@@ -85,12 +100,12 @@ class Block(object):
 
     #not mem nor time efficient - should be better algo that considers symmetry...
     def transformations(self):
-        if self.__card == 1 : return [self.__mat]
-        cpy = self.__mat.copy()
-        rot = lambda m,n : np.rot90(m,n)
-        ref = np.fliplr(cpy)
-        ts = [cpy,rot(cpy,1),rot(cpy,2),rot(cpy,2),ref,rot(ref,1),rot(ref,2),rot(ref,3)]
-        return np.unique(ts)
+        if self.__card == 1 : return [self]
+        mat = self.__mat
+        ref = np.fliplr(mat)
+        rot = lambda m,n : [self.standardize(np.rot90(m,i)) for i in range(n)]
+        ts = np.unique(np.concatenate((rot(mat,4),rot(ref,4))),axis=0)
+        return [self.__class__.__call__(t) for t in ts]
 
     def get_mat(self):
         return self.__mat
@@ -105,9 +120,9 @@ class Block(object):
         s = ''
         dm = self.__dim
         for i in range(dm*dm):
-            if i == 0: s += '-'*(dm*2+3)+'\n'
+            #if i == 0: s += '*'*(dm*2+1)+'\n'
             if i%dm == 0: s += '|'
-            s += str(self.__grid[int(i/dm)][i%dm])+'|'
+            s += 'X' if self.__mat[int(i/dm)][i%dm] else ' '
             if i%dm == dm-1: s += '|\n'
-            if i == dm*dm-1: s += '-'*(dm*2+3)+'\n'
+            #if i == dm*dm-1: s += '*'*(dm*2+1)+'\n'
         return s
