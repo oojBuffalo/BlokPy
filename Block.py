@@ -92,12 +92,6 @@ class Block(object):
             new_mat = np.roll(new_mat,-1,axis=0)
         return new_mat
 
-        #player has move if one of their remaining blocks fits on the board
-        #i.e. there exists a block within the set of all transformations of all
-        #     remaining blocks such that the one of its transformations can be
-        #     placed on the board as a valid move.
-
-
     #not mem nor time efficient - should be better algo that considers symmetry...
     def transformations(self):
         if self.__card == 1 : return [self]

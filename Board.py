@@ -25,19 +25,8 @@ class Board(object):
         self.__grid = np.zeros(n*n,dtype=int).reshape(n,n)
         self.__size = n
 
-    #Function allows a player to place any (transformed) block onto the board.
-    #INPUT: @pid : int = the player's id
-    #       @block : Block = the (transformed) block
-    #       @loc : list = the location in which the [0][0]th entry of the
-    #                      matrix underlying the block object is to be placed
-    #OUTPUT: void
-    def place_block(self,pid,block,loc):
-        block_rs,block_cs = np.nonzero(block.get_mat())
-        board_rs = block_rs+loc[0]
-        board_cs = block_cs+loc[1]
-
+    def is_valid_placement(self,pid,board_rs,board_cs,loc):
         #---------------------Check if move is valid----------------------#
-
         #Condition 1: invalid if any squares in the block are off the grid.
         if ((board_rs < 0).any()
             or (board_rs >= self.__size).any()
@@ -63,8 +52,21 @@ class Board(object):
         space = np.take(self.__grid,vert_pstns)
         if (space != pid).all() and np.isin(pid,self.__grid.flatten()):
             raise Exception("No diagonally adjacent blocks")
-
         #-------------------------Move is valid---------------------------#
+
+
+    #Function allows a player to place any (transformed) block onto the board.
+    #INPUT: @pid : int = the player's id
+    #       @block : Block = the (transformed) block
+    #       @loc : list = the location in which the [0][0]th entry of the
+    #                      matrix underlying the block object is to be placed
+    #OUTPUT: void
+    def place_block(self,pid,block,loc):
+        block_rs,block_cs = np.nonzero(block.get_mat())
+        board_rs = block_rs+loc[0]
+        board_cs = block_cs+loc[1]
+        self.is_valid_placement(pid,board_rs,board_cs,loc)
+        board_pstns = (board_rs)*self.__size+(board_cs)
         np.put(self.__grid,board_pstns,pid)
 
     def rm_oob_idxs(self,rs,cs):
