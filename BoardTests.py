@@ -131,6 +131,19 @@ class BoardTests(unittest.TestCase):
             self.assertEqual(True,True)
 
         #print(theBoard.to_string())
+    def test_player_vertices(self):
+        theBoard = Board.Board()
+        pick_axe = np.array([[1,0,0,0],[1,1,0,0],[1,0,0,0],[1,0,0,0]])
+        pick_axe_b = Block.Block(pick_axe)
+        theBoard.place_block(1,pick_axe_b,(16,0))
+        p_verts = theBoard.player_vertices(1)
+        self.assertEqual(np.array([301,322,362]).all(),p_verts.all())
+
+        scythe = np.array([[0,0,0,1],[1,1,1,1],[0,0,0,0],[0,0,0,0]])
+        scythe_b = Block.Block(scythe)
+        theBoard.place_block(1,scythe_b,(14,1))
+        pp_verts = theBoard.player_vertices(1)
+        self.assertEqual(np.array([263,265,280,325,362]).all(),p_verts.all())
 
 if __name__ == '__main__':
     unittest.main()

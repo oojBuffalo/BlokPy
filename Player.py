@@ -21,7 +21,17 @@ class Player(object):
         self.pid = uid
         self.block_set = given_blocks
 
+
+    #player has move if one of their remaining blocks fits on the board
+    #i.e. there exists a block within the set of all transformations of all
+    #     remaining blocks such that the one of its transformations can be
+    #     placed on the board as a valid move.
     def has_move(self,board):
+        #Step 1: Find all transformations of remaining blocks.
+        rem_ts = []
+        rem_ts += [rb.transformations() for rb in self.block_set]
+        #Step 2: Find all vertices of players colors blocks on the board
+        #        s.t. they are both unfilled and in-bounds.
         raise Exception('Unimplemented')
 
     def possible_moves(self,board):

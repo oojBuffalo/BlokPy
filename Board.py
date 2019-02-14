@@ -68,6 +68,7 @@ class Board(object):
         self.is_valid_placement(pid,board_rs,board_cs,loc)
         board_pstns = (board_rs)*self.__size+(board_cs)
         np.put(self.__grid,board_pstns,pid)
+        print(self.to_string())
 
     def rm_oob_idxs(self,rs,cs):
 
@@ -124,6 +125,10 @@ class Board(object):
         final = no_block_pstns[np.isin(no_block_pstns,adj_pstns,invert=True)]
         final.sort()
         return final
+
+    def player_vertices(self,pid):
+        plyr_rs,plyr_cs = np.where(self.__grid == pid)
+        return self.vertices(plyr_rs,plyr_cs)
 
     def get_grid(self):
         return self.__grid.copy()
