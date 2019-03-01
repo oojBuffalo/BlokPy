@@ -32,6 +32,8 @@ class Player(object):
         rem_ts += [rb.transformations() for rb in self.block_set]
         #Step 2: Find all vertices of players colors blocks on the board
         #        s.t. they are both unfilled and in-bounds.
+        board_verts = board.player_vertices(self.pid)
+
         raise Exception('Unimplemented')
 
     def possible_moves(self,board):

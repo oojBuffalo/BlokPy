@@ -83,14 +83,23 @@ class Block(object):
         return np.fliplr(self.__mat)
 
     #not mem efficient
-    #shifts piece to most up-left position
+    #shifts piece to most up-left position, then pads
     def standardize(self,mat):
         new_mat = mat
         while (new_mat[:,0] == 0).all():
             new_mat = np.roll(new_mat,-1,axis=1)
         while (new_mat[0,:] == 0).all():
             new_mat = np.roll(new_mat,-1,axis=0)
-        return new_mat
+        return pad(new_mat)
+
+    def pad(og_mat):
+        mat = np.insert(og_mat,0,0,axis=0)
+        mat = np.insert(mat,0,0,axis=1)
+        if (mat[mat.shape[0]-1,:] != 0).any():
+            mat = np.insert(mat,mat.shape[0],0,axis=0)
+        if (mat[:,mat.shape[0]-1] != 0).any():
+            mat = np.insert(mat,mat.shape[0],0,axis=1)
+        return mat
 
     #not mem nor time efficient - should be better algo that considers symmetry...
     def transformations(self):

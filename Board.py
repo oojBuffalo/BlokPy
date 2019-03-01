@@ -70,49 +70,49 @@ class Board(object):
         np.put(self.__grid,board_pstns,pid)
         print(self.to_string())
 
-    def rm_oob_idxs(self,rs,cs):
+    def rm_oob_idxs(self,rs,cs,size=self.__size):
 
         oob_up = np.where(rs < 0)[0]
-        oob_dn = np.where(rs >= self.__size)[0]
+        oob_dn = np.where(rs >= size)[0]
         oob_lf = np.where(cs < 0)[0]
-        oob_rt = np.where(cs >= self.__size)[0]
+        oob_rt = np.where(cs >= size)[0]
 
         if (len(oob_up) == 0
             and len(oob_dn) == 0
             and len(oob_lf) == 0
             and len(oob_rt) == 0):
-            return rs*self.__size+cs
+            return rs*size+cs
 
         oob_idxs = np.unique(np.concatenate((oob_up,oob_dn,oob_lf,oob_rt)))
         new_rs = np.delete(rs,oob_idxs)
         new_cs = np.delete(cs,oob_idxs)
-        return new_rs*self.__size+new_cs
+        return new_rs*size+new_cs
 
-    def adjacent(self,board_rs,board_cs):
-        board_pstns = board_rs*self.__size+board_cs
+    def adjacent(self,rs,cs,size=self.__size):
+        board_pstns = rs*size+cs
 
-        raw_up = board_rs-1
-        raw_dn = board_rs+1
-        raw_lf = board_cs-1
-        raw_rt = board_cs+1
+        raw_up = rs-1
+        raw_dn = rs+1
+        raw_lf = cs-1
+        raw_rt = cs+1
 
-        up = self.rm_oob_idxs(raw_up,board_cs)
-        dn = self.rm_oob_idxs(raw_dn,board_cs)
-        lf = self.rm_oob_idxs(board_rs,raw_lf)
-        rt = self.rm_oob_idxs(board_rs,raw_rt)
+        up = self.rm_oob_idxs(raw_up,cs)
+        dn = self.rm_oob_idxs(raw_dn,cs)
+        lf = self.rm_oob_idxs(rs,raw_lf)
+        rt = self.rm_oob_idxs(rs,raw_rt)
 
         all_pstns = np.unique(np.concatenate((up,lf,rt,dn)))
         final = all_pstns[np.isin(all_pstns,board_pstns,invert=True)]
         final.sort()
         return final
 
-    def vertices(self,board_rs,board_cs):
-        board_pstns = board_rs*self.__size+board_cs
+    def vertices(self,rs,cs,size=self.__size):
+        board_pstns = rs*size+cs
 
-        up = board_rs-1
-        dn = board_rs+1
-        lf = board_cs-1
-        rt = board_cs+1
+        up = rs-1
+        dn = rs+1
+        lf = cs-1
+        rt = cs+1
 
         up_lf = self.rm_oob_idxs(up,lf)
         up_rt = self.rm_oob_idxs(up,rt)
@@ -121,14 +121,16 @@ class Board(object):
 
         raw_pstns = np.concatenate((up_lf,up_rt,dn_lf,dn_rt))
         no_block_pstns = raw_pstns[np.isin(raw_pstns,board_pstns,invert=True)]
-        adj_pstns = self.adjacent(board_rs,board_cs)
+        adj_pstns = self.adjacent(rs,cs)
         final = no_block_pstns[np.isin(no_block_pstns,adj_pstns,invert=True)]
         final.sort()
         return final
 
     def player_vertices(self,pid):
         plyr_rs,plyr_cs = np.where(self.__grid == pid)
-        return self.vertices(plyr_rs,plyr_cs)
+        plyr_verts = self.vertices(plyr_rs,plyr_cs)
+        open_verts = np.where(self.__grid.flatten(plyr_verts) == 0)
+        return open_verts[0]
 
     def get_grid(self):
         return self.__grid.copy()
