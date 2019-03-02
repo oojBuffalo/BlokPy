@@ -142,7 +142,7 @@ class BoardTests(unittest.TestCase):
         scythe = np.array([[0,0,0,1],[1,1,1,1],[0,0,0,0],[0,0,0,0]])
         scythe_b = Block.Block(scythe)
         theBoard.place_block(1,scythe_b,(14,1))
-        pp_verts = theBoard.player_vertices(1)
+        p_verts = theBoard.player_vertices(1)
         self.assertEqual(np.array([263,265,280,325,362]).all(),p_verts.all())
 
 if __name__ == '__main__':

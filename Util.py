@@ -11,7 +11,7 @@
 #       @cs : int-ndarray = column coordinates of polyomino(es) within matrix
 #       @size : int = size in terms of n of the surrounding nxn matrix
 #       @flat : bool = if true -> return coordinates of flattened matrix,
-#                       if false -> return coordinates of the nxn matrix
+#                      if false -> return coordinates of the nxn matrix
 def rm_oob_idxs(rs,cs,size):
     oob_up = np.where(rs < 0)[0]
     oob_dn = np.where(rs >= size)[0]
@@ -50,10 +50,10 @@ def adjacent(rs,cs,size,flat=True,check_oob=True):
         l = rm_oob_idxs(rs,lf)
         r = rm_oob_idxs(rs,rt)
     else:
-        u = up*size+lf
-        d = up*size+rt
-        l = dn*size+lf
-        r = dn*size+rt
+        u = up*size+cs
+        d = dn*size+cs
+        l = rs*size+lf
+        r = rs*size+rt
 
     flat_plymno_idxs = rs*size+cs
     adj_idxs = np.unique(np.concatenate((u,l,r,d)))
@@ -69,7 +69,7 @@ def adjacent(rs,cs,size,flat=True,check_oob=True):
 #       @cs : int-ndarray = column indices of polyomino(es) within matrix
 #       @size : int = size in terms of n of the surrounding nxn matrix
 #       @flat : bool = if true -> return indices of flattened matrix,
-#                       if false -> return indices of the nxn matrix
+#                      if false -> return indices of the nxn matrix
 #       @check_oob : bool = if true -> return adjacencies with inbound coords
 #                           if false -> return all adjacencies regardless
 def diagonal(rs,cs,size,flat=True,check_oob=True):
