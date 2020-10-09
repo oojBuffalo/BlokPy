@@ -1,8 +1,8 @@
-import numpy as np
-#from scipy.sparse import csr_matrix
-#from scipy.sparse.csgraph import connected_components
+"""This module will implement Block class."""
 
-class Block(object):
+import numpy as np
+
+class Block():
     """
     This class will represent a unique polyomino of an arbitrary size.
     More clearly, a single instance of "block" may represent the distinct
@@ -37,12 +37,12 @@ class Block(object):
     def __eq__(self,other):
         if isinstance(other,self.__class__):
             return self.__mat.all() == other.get_mat().all()
-        else: False
+        return False
 
-    #Function verifies traditional game pieces.
     #INPUT: void
     #OUTPUT: boolean indicating if polyomino is a traditional game piece
     def is_valid(self):
+        """Function verifies traditional game pieces."""
         if self.__dim > self.__card or self.__card <= 0 or self.__card > 5:
             return False
         rs,cs = np.nonzero(self.__mat)
@@ -84,14 +84,7 @@ class Block(object):
 
     #not mem efficient
     #shifts piece to most up-left position, then pads
-    def standardize(self,mat):
-        new_mat = mat
-        while (new_mat[:,0] == 0).all():
-            new_mat = np.roll(new_mat,-1,axis=1)
-        while (new_mat[0,:] == 0).all():
-            new_mat = np.roll(new_mat,-1,axis=0)
-        return pad(new_mat)
-
+    @staticmethod
     def pad(og_mat):
         mat = np.insert(og_mat,0,0,axis=0)
         mat = np.insert(mat,0,0,axis=1)
@@ -100,6 +93,15 @@ class Block(object):
         if (mat[:,mat.shape[0]-1] != 0).any():
             mat = np.insert(mat,mat.shape[0],0,axis=1)
         return mat
+
+    @staticmethod
+    def standardize(mat):
+        new_mat = mat
+        while (new_mat[:,0] == 0).all():
+            new_mat = np.roll(new_mat,-1,axis=1)
+        while (new_mat[0,:] == 0).all():
+            new_mat = np.roll(new_mat,-1,axis=0)
+        return Block.pad(new_mat)
 
     #not mem nor time efficient - should be better algo that considers symmetry...
     def transformations(self):

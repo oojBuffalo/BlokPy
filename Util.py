@@ -5,6 +5,7 @@
 ##__________________________/_______________________________________________##
 ##############################################################################
 
+import numpy as np
 
 #Function returns unit squares that are within the bounds of matrix.
 #INPUT: @rs : int-ndarray = row coordinates of polyomino(es) within matrix
@@ -45,10 +46,10 @@ def adjacent(rs,cs,size,flat=True,check_oob=True):
     rt = cs+1
 
     if check_oob:
-        u = rm_oob_idxs(up,cs)
-        d = rm_oob_idxs(dn,cs)
-        l = rm_oob_idxs(rs,lf)
-        r = rm_oob_idxs(rs,rt)
+        u = rm_oob_idxs(up,cs,size)
+        d = rm_oob_idxs(dn,cs,size)
+        l = rm_oob_idxs(rs,lf,size)
+        r = rm_oob_idxs(rs,rt,size)
     else:
         u = up*size+cs
         d = dn*size+cs
@@ -79,10 +80,10 @@ def diagonal(rs,cs,size,flat=True,check_oob=True):
     rt = cs+1
 
     if check_oob:
-        up_lf = rm_oob_idxs(up,lf)
-        up_rt = rm_oob_idxs(up,rt)
-        dn_lf = rm_oob_idxs(dn,lf)
-        dn_rt = rm_oob_idxs(dn,rt)
+        up_lf = rm_oob_idxs(up,lf,size)
+        up_rt = rm_oob_idxs(up,rt,size)
+        dn_lf = rm_oob_idxs(dn,lf,size)
+        dn_rt = rm_oob_idxs(dn,rt,size)
     else:
         up_lf = up*size+lf
         up_rt = up*size+rt
